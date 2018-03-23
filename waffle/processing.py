@@ -27,9 +27,12 @@ class DataProcessor():
         self.energy_name = "trap_max"
         self.current_name = "current_max_5"
 
-        #File hierarchy for this work:
-        #Base dir is from $DATADIR environment variable
-        self.mjd_data_dir = os.path.join(os.getenv("DATADIR", "."), "mjd")
+        # File hierarchy for this work:
+        #  Base dir is from $DATADIR environment variable
+		# raw data is at /data4/majorana/mjd/surfmjd/data/raw/P3KJR/Data/
+		# but I softlinked it into /data4/majorana/sjmeijer, where t1, t2, NLCDB, and analysis dirs already are
+        #self.mjd_data_dir = os.path.join(os.getenv("DATADIR", "."), "mjd")
+        self.mjd_data_dir = os.getenv("DATADIR", ".")
         self.raw_data_dir = os.path.join(self.mjd_data_dir,"raw")
         self.t1_data_dir = os.path.join(self.mjd_data_dir,"t1")
         self.t2_data_dir = os.path.join(self.mjd_data_dir,"t2")
@@ -213,7 +216,8 @@ class DataProcessor():
             channel = (ccc & 0xf)
             backwards = (crate << 9) + (card << 4) + channel
 
-            NLCMapDir = os.path.join(os.getenv("DATADIR", "."), "mjd","NLCDB")
+            #NLCMapDir = os.path.join(os.getenv("DATADIR", "."), "mjd","NLCDB")
+            NLCMapDir = os.path.join(os.getenv("DATADIR", "."), "NLCDB")
 
             #  // The board labeled SN-021h return 0x221 when probed by ORCA
             #  // Our NLC folders use the board labels so change this one.
