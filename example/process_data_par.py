@@ -15,16 +15,17 @@ def main(args):
     if(len(runs)==1):
         runList = [runs[0]]
     elif(len(runs)==2):
-        runList = np.arange(runs[0],runs[1])
+        runList = np.arange(runs[0],runs[1]+1)
     elif(len(runs)>=3):
         runList = np.array(runs)
 
     for r in runList:
-        call = "qsub process_data.sh -r %d -c %s" % (r,(','.join(str(c) for c in chanList)))
+        call = "qsub process_data.sh -F\" -r %d -c %s\"" % (r,(','.join(str(c) for c in chanList)))
 
         if args.dryrun==True:
             print(call)
         else:
+            print(call)
             os.system(call)
    
 

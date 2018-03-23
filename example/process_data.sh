@@ -9,9 +9,9 @@ import multiprocessing as mp
 
 def main(runList,chanList):
 
-    print(runList)
-    print(chanList)
-    sys.exit()
+    #print(runList)
+    #print(chanList)
+    #sys.exit()
 
     #data processing
     proc = DataProcessor()
@@ -21,11 +21,10 @@ def main(runList,chanList):
     proc.tier1(runList, num_threads=mp.cpu_count())
 
     #calibration, simple analysis
-    proc.calibrate(runList)
-    proc.ae_cut(runList, )
-    proc.baseline_cuts(runList, )
+    #proc.calibrate(runList)
+    #proc.ae_cut(runList, )
+    #proc.baseline_cuts(runList, )
 
-   
 
 if __name__=="__main__":
 	parser = argparse.ArgumentParser()
