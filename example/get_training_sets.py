@@ -18,12 +18,12 @@ def main():
     # proc.tier1(runList, num_threads=6)
 
     #calibration, simple analysis
-    # proc.calibrate(runList)
-    # proc.ae_cut(runList, )
-    # proc.baseline_cuts(runList, )
+    proc.calibrate(runList)
+    proc.ae_cut(runList, )
+    proc.baseline_cuts(runList, )
 
     #cut waveforms
-    # proc.save_training_data(np.arange(11510,11530), chanList, "training_data/training_set.h5")
+    proc.save_training_data(np.arange(11510,11530), chanList, "training_data/training_set.h5")
 
     n_waveforms = 8
     for chan in chanList:
