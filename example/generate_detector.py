@@ -12,8 +12,9 @@ def main():
 
         conf_name = os.path.join(os.environ['DATADIR'], "siggen", "config_files", "{}.conf".format(detector_name))
 
-        det_info = wd.get_detector_info(detector_name)
-        wd.detector_info_to_conf_file(det_info, conf_name)
+        #det_info = wd.get_detector_info(detector_name)
+        #wd.detector_info_to_conf_file(det_info, conf_name)
+        wd.create_conf_file(detector_name, conf_name)
         wd.generate_fields(det_info, conf_name)
 
 if __name__=="__main__":

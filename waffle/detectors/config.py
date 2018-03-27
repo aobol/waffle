@@ -14,8 +14,8 @@ def create_conf_file(detector_name, output_name):
         imp_min, imp_max = -2, -5
 
     elif detector_name[0].lower() == "p": #ORTEC
-        det_info = get_detector_info(detector_name)
-        siggen_dict = detector_info_to_conf_file(det_info)
+        det_info = get_ortec_detector_info(detector_name)
+        siggen_dict = detector_info_to_conf_file(det_info, output_name)
 
         #divide by 10 to go from 1E9 to 1E10
         imp_max = -(1+uncert)*np.amax((det_info["impurity_tail"], det_info["impurity_seed"]) ) / 10.
@@ -95,9 +95,12 @@ def get_ortec_detector_info(detector_name):
     return detector_info
 
 def detector_info_to_conf_file(detector_info, output_name):
-
+    print("the name is: ", detector_info.name)
     #convert this all to siggen-style
     siggen_dict = get_ortec_siggen_default(detector_info.name)
+    print(detector_info)
+    print(siggen_dict)
+
     siggen_dict["geometry"]["xtal_length"] = np.round(detector_info["length"],2)
     siggen_dict["geometry"]["xtal_radius"] = np.round(detector_info["diameter"]/2.,2)
     siggen_dict["geometry"]["pc_length"] = np.round(detector_info["pc_length"],2)
@@ -119,6 +122,8 @@ def get_ortec_siggen_default(detector_name):
         "ditch_depth":0,
         "ditch_thickness":0
         }
+
+    return sig_dic
 
 def get_bege_siggen_default(detector_name):
     sig_dic = get_siggen_default(detector_name)

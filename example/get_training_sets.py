@@ -23,7 +23,7 @@ def main():
     # proc.baseline_cuts(runList, )
 
     #cut waveforms
-    # proc.save_training_data(np.arange(11510,11530), chanList, "training_data/training_set.h5")
+    proc.save_training_data(np.arange(11510,11530), chanList, "training_data/training_set.h5")
 
     n_waveforms = 8
     for chan in chanList:
