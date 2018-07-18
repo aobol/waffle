@@ -16,7 +16,7 @@ class WaveformModel(ModelBaseClass):
     """
     Specify the model in Python.
     """
-    def __init__(self, target_wf, align_percent, detector, align_idx=125, do_smooth=True, smoothing_type="gauss"):
+    def __init__(self, target_wf, align_percent, detector, align_idx=125, do_smooth=True, smoothing_type="gauss", fit_manager=None):
 
         self.detector = detector
 
@@ -127,10 +127,21 @@ class WaveformModel(ModelBaseClass):
         return model
 
     def calc_likelihood(self, wf_params):
+        self.target_wf.window_waveform(time_point=0.5, early_samples=100, num_samples=200, method="percent")
         data = self.target_wf.windowed_wf
         # model_err = 0.57735027 * wf.baselineRMS
         model_err = 2.5 #TODO: get this from the waveform itself
         data_len = len(data)
+
+        if(data_len == 0):
+            print("Data length is 0, there is probably a problem...")
+            print("Before windowing, data length was: {}".format(len(self.target_wf.data)) )
+            # print(self.target_wf.data)
+            exit()
+
+        print("\nWF Params:")
+        print(wf_params)
+
         model = self.make_waveform(data_len, wf_params, )
 
         if model is None:

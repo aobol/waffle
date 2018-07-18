@@ -5,7 +5,7 @@ from waffle.processing import *
 
 def main():
 
-    runList = np.arange(11510, 11600)
+    runList = np.arange(11510, 11515) #11600)
 
     chanList = [600,626,672, 692, 648, 640]
 
@@ -23,7 +23,7 @@ def main():
     # proc.baseline_cuts(runList, )
 
     #cut waveforms
-    # proc.save_training_data(np.arange(11510,11530), chanList, "training_data/training_set.h5")
+    proc.save_training_data(runList, chanList, "training_data/training_set.h5")
 
     n_waveforms = 8
     for chan in chanList:
