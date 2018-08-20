@@ -14,7 +14,7 @@ class VelocityModel(JointModelBase):
         h111_lo, h111_hi, self.h111_beta = self.transform_velo_params(107270., 0.580, 100.)
 
         parameter_names = ["h100_{}".format(E_lo), "h111_{}".format(E_lo),
-                                "h100_{}".format(E_hi), "h111{}".format(E_hi),
+                                "h100_{}".format(E_hi), "h111_{}".format(E_hi),
                                 "h100_beta", "h111_beta"
                                 ]
 
