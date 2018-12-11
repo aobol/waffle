@@ -25,7 +25,7 @@ from scipy.interpolate import interp1d
 
 class DataProcessor():
 
-    def __init__(self, detectorChanList):
+    def __init__(self, detectorChanList, channel_file=""):
         #energy & current estimator to use for A/E
         self.energy_name = "trap_max"
         self.ecal_name = "ecal"
@@ -46,7 +46,7 @@ class DataProcessor():
         self.nl_file_name = os.path.join(self.mjd_data_dir,"NLCDB", "nonlinearities.h5")
 
         #TODO: in a real db?
-        self.channel_info_file_name = os.path.join(self.mjd_data_dir,"analysis", "channel_info.h5")
+        self.channel_info_file_name = os.path.join(self.mjd_data_dir,"analysis", "channel_info{}.h5".format(channel_file))
         # self.cal_file_name = os.path.join(self.mjd_data_dir,"analysis", "calibration.h5")
         # self.psa_file_name = os.path.join(self.mjd_data_dir,"analysis", "psa.h5")
         # self.blcut_file_name = os.path.join(self.mjd_data_dir,"analysis", "blcuts.h5")
@@ -257,6 +257,7 @@ class DataProcessor():
         df_bl.to_hdf(self.channel_info_file_name,   key="baseline", mode='a')
 
     def calc_ae_cut(self, df):
+        print("Entering calc_ae_cut")
 
         energy_name = self.energy_name
         current_name = self.current_name
@@ -269,6 +270,7 @@ class DataProcessor():
             if channel not in self.detectorChanList:
                 continue
 
+            print("Getting AvsE cut for {}...".format(channel))
             avse2, avse1, avse0, avse_cut, avse_mean, avse_std = get_avse_cut(df_chan[self.ecal_name], df_chan[current_name], f)
 
             row = {"channel": channel,
@@ -294,7 +296,7 @@ class DataProcessor():
 
         '''only run this on one channel at a time
            only calibrates channels in self.detectorChanList
-        '''
+        ''' 
 
 
         try: os.mkdir("cal_plots")
@@ -348,6 +350,9 @@ class DataProcessor():
         # return cal_map
 
     def tier0(self, runList, chan_list=None):
+        if chan_list is None:
+            chan_list=self.detectorChanList
+        
         process_tier_0(self.raw_data_dir, runList, output_dir=self.t1_data_dir, chan_list=chan_list)
 
     def tier1(self, runList, num_threads, overwrite=False):
@@ -551,7 +556,7 @@ class DataProcessor():
         df_chan["bl_cut"] = bl_cut
 
         #Make a cut based on drift t0-t99 drift time
-
+        print(df_chan)
         df_chan["drift_time"] = df_chan[self.dt_max_param] - df_chan["t0est"]
         cut = df_chan["bl_cut"] & (df_chan.ae>0)&(df_chan.ae<2) & (df_chan[self.ecal_name] > min_e)
 

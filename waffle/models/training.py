@@ -42,6 +42,7 @@ class Model(object):
         self.detector = det
 
     def setup_waveforms(self, wf_conf, doPrint=False):
+        print(wf_conf)
         wfFileName = wf_conf.wf_file_name
 
         if os.path.isfile(wfFileName):

@@ -48,5 +48,17 @@ class TrappingModel(JointModelBase):
         ]
 
     def apply_to_detector(self, params, detector):
-        trap_c  = params
+
+        # The other models all can take an array, instead of just a scalar
+        # This checks if params is an array or list, and just selects the first element
+        # TODO: Shold probably also check that the length is only 1
+        if hasattr(params, "__len__"):
+            if(len(params) == 1):
+                trap_c = params[0]
+            else:
+                print("ERROR: You fed the trapping model a list, it only takes one value...")
+                raise TypeError
+        else:
+            trap_c  = params
+
         detector.siggenInst.SetTrapping(trap_c)

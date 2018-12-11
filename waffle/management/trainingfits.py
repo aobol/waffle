@@ -62,10 +62,16 @@ class LocalFitManager():
             # print (result)
         return lnlike
 
-    def fit(self, numLevels, directory="",numPerSave=1000,numParticles=5,new_level_interval=10000 ):
+    def fit(self, numLevels, directory=None, numPerSave=1000,numParticles=5,new_level_interval=10000 ):
+
+      if directory is None:
+        directory = "./"  
+
+      if not os.access(directory, os.W_OK):
+        raise OSError("Directory {} either does not exist or is not writeable to the fitter...".format(directory))
 
       sampler = dnest4.DNest4Sampler(self.model,
-                                     backend=dnest4.backends.CSVBackend(basedir ="./" + directory,
+                                     backend=dnest4.backends.CSVBackend(basedir = directory,
                                                                         sep=" "))
 
       # Set up the sampler. The first argument is max_num_levels

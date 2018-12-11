@@ -10,6 +10,9 @@ from siggen import PPC
 
 from ._parameterbase import ModelBaseClass, Parameter
 
+import matplotlib.pyplot as plt 
+from matplotlib import gridspec
+
 max_float = sys.float_info.max
 
 class WaveformModel(ModelBaseClass):
@@ -37,7 +40,7 @@ class WaveformModel(ModelBaseClass):
         self.do_smooth=do_smooth
         self.smoothing_type = smoothing_type
         if do_smooth:
-            if smoothing_type == "gauss":
+            if smoothing_type == "gauss" or smoothing_type == "gaussian":
                 smooth_guess = 20
                 self.params.append(Parameter("smooth", "gaussian", mean=smooth_guess, variance=10, lim_lo=1, lim_hi=100))
             elif smoothing_type == "skew":
@@ -140,6 +143,27 @@ class WaveformModel(ModelBaseClass):
         else:
             inv_sigma2 = 1.0/(model_err**2)
             ln_like = -0.5*(np.sum((data-model)**2*inv_sigma2 - np.log(inv_sigma2)))
+            
+            # r, z, phi, scale, maxt,smooth =  wf_params[:6]
+            # axes = plt.gca()
+
+            # gs = gridspec.GridSpec(2, 1, height_ratios=[4, 1])
+            # ax0 = plt.subplot(gs[0])
+            # ax1 = plt.subplot(gs[1], sharex=ax0)
+            # ax1.set_xlabel("Digitizer Time [ns]")
+            # ax0.set_ylabel("Voltage [Arb.]")
+            # ax1.set_ylabel("Residual")
+            
+            # ax0.plot(data,label="data")
+            # ax0.plot(model,label="fit")
+            # textstr = "r:     {r:2.2f}\nz:     {z:2.2f}\nphi:     {phi:2.3f}\nscale:  {scale:5.1f}\nmaxt:    {maxt:3.2f}\nsmooth:   {smooth:3.2f}\nll:   {ll:10.1f}".format(r=r,z=z,phi=phi,scale=scale,maxt=maxt,smooth=smooth,ll=ln_like)
+            # ax0.text(0.02, 0.5, textstr, fontsize=14)
+            # ax0.set_ylim([0,1.1*np.max(data)])
+            # ax0.legend()
+            # ax1.plot(model-data)
+            # plt.pause(0.05)
+            # plt.clf()
+            # plt.show()
 
         return ln_like
 
