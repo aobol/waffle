@@ -159,6 +159,10 @@ class WaveformBatchConfiguration(object):
         WaveformBatchConfiguration is used to store information for running single 
         waveform fits, and for understanding the data context later. 
 
+        May be invoked like:
+            wf_batch_conf = WaveformBatchConfiguration(None)
+            wf_batch_conf.load_config(batch_dir)
+
         Parameters
         ----------
         wf_file_name: string
@@ -222,6 +226,164 @@ class WaveformBatchConfiguration(object):
         self.__dict__.update(pickle.load(open(saved_file, 'rb')))
         # self.wf_config = WaveformConfiguration(**self.wf_conf)
 
+class WaveformT3BatchConfiguration(object):
+    def __init__(self,
+        #params for setting up & aligning waveforms
+        run_number,
+        channel,
+        dataset,
+        subset,
+        # index,
+        # directory = "",
+        params = None,
+        detector_conf = None,
+        models = None,
+        # wf_idx,
+        align_idx = 200,
+        num_samples = 1000,
+        align_percent = 0.95,
+        do_smooth=True,
+        wf_idxs=None,
+        smoothing_type="gauss",
+        saved_file_name = "t3_fit_params.npy"
+    ):
+        """
+        WaveformT3Configuration is used to store information for running tier 3 
+        waveform fits, and for understanding the data context later. 
+
+        Parameters
+        ----------
+        wf_file_name: string
+            full path to the file containing waveforms (probably an npz)
+        directory: string
+            the top level directory where all the fits will get saved (doesn't need to be a full path)
+        align_idx:
+            The sample index where the align percent will be aligned to
+        align_percent: 
+            The fractional value 0-1 indicating where on the wf will be aligned to
+        do_smooth: bool 
+            Turns on the charge cloud smoothing, which is probably what you want
+        wf_idxs: 
+            A list of all the indices to fit, such as range(100). Presently unused in any real situation
+
+
+        For the directory, the ultimate structure should end up as:
+
+        directory
+        |__ run_11510/
+            |__ channel 600  <----- Each channel dir is made separately
+                |-- t3_fit_params.npy
+                |__ wf0/
+                    |__ fit_params.npy      <- This is generated later
+                    |__ posterior_sample.txt
+                    |__ sample.txt
+                    |__ levels.txt      
+                    |__ sample_info.txt
+                    |__ weights.txt
+
+                |__ wf739/      <----- These wf dirs correspond to a timestamp in a run
+                |__ wf123456/
+            |__ channel 608
+                |__ wf2
+                |__ wf666
+        |__ run_11511
+            |__ channel 600
+                |__ wf12 
+                |__ wf777
+                |__ wf9876
+
+
+
+
+        """
+        self.run_number = run_number
+        self.channel = channel
+        self.dataset = dataset
+        self.subset = subset
+        # self.directory = directory
+        self.params = params
+        self.detector_conf = detector_conf
+        self.models = models
+        # self.wf_file_name = wf_file_name
+        self.align_idx = align_idx
+        self.align_percent = align_percent
+        self.num_samples = num_samples
+        self.wf_idxs = wf_idxs
+        self.do_smooth=do_smooth
+        self.smoothing_type=smoothing_type
+        self.saved_file_name = saved_file_name
+
+
+        
+        # self.setup_detector()
+        # self.extract_results()
+
+
+
+
+
+    # def setup_detector(self,):
+    #     # Setup detector things
+    #     from siggen import PPC
+    #     conf_name = "{}.conf".format( chan_dict[chan] )
+
+    #     conf_file = datadir +"siggen/config_files/" + conf_name
+    #     detector = PPC( conf_file, wf_padding=100)
+
+
+
+
+    # def extract_results(self,):
+    #     # Pull out results
+    #     from waffle.postprocessing import TrainingResultSummary
+
+    #     res = TrainingResultSummary(
+    #         result_directory=training_fit_name, 
+    #         num_samples=1000, 
+    #         sample_dec=1, 
+    #         model_type="Model"
+    #     )
+    #     res.parse_samples(
+    #         sample_file_name="posterior_sample.txt",
+    #         directory=training_fit_name, 
+    #         num_to_read=100000, 
+    #         sample_dec=1)
+    #     res.extract_model_values()
+    #     params_values = res.params_values
+
+
+    def save_config(self):
+        print("Saving configuration file...")
+
+        mjd_data_dir = os.path.join(os.getenv("DATADIR", "."), "mjd")
+        wf_fit_dir = os.path.join(mjd_data_dir,"wf_fits")
+        fit_subdir = "DS{d}-{s}/{r}/{c}".format(
+            d=self.dataset,
+            s=self.subset,
+            r=self.run_number,
+            c=self.channel)  
+        
+        save_dir = os.path.join(wf_fit_dir,fit_subdir)
+
+        saved_file=os.path.join(save_dir, self.saved_file_name)
+        try:
+            os.makedirs(save_dir)
+        except FileExistsError as e:
+            pass
+        if(os.path.isfile(saved_file)):
+            print("A configuration file already exists at: {0}".format(saved_file))
+            print("Remove the directory/file manually or select a different file.")
+            exit()
+        pickle.dump(self.__dict__.copy(),open(saved_file, 'wb'))
+        print("Saved configuration at {}".format(saved_file))
+
+    def load_config(self,directory):
+        saved_file=os.path.join(directory, "t3_fit_params.npy")
+        if not os.path.isfile(saved_file):
+            print ("Saved configuration file {0} does not exist".format(saved_file))
+            exit()
+
+        self.__dict__.update(pickle.load(open(saved_file, 'rb')))
 
 class FitConfiguration(object):
     """

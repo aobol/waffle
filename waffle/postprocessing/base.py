@@ -138,10 +138,19 @@ class ResultBase():
 
         old_dir = os.getcwd()
         os.chdir(directory)
-        dnest4.postprocess(plot=False)
+        logZ, info, weights = None,None,None
+        try:
+            logZ, info, weights = dnest4.postprocess(plot=False)
+        except IndexError as e:
+            print(e)
+            print(F"There was an issue looking at the result in {directory}")
+            print('\033[91m'+"I'll try to keep going but this looks serious..."+'\033[0m')
+            import time
+            time.sleep(3)
         os.chdir(old_dir)
 
-        return
+
+        return logZ, info, weights
 
 
     def multipage_plot(self,filename, figs=None, dpi=200):

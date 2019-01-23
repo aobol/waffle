@@ -62,7 +62,7 @@ class LocalFitManager():
             # print (result)
         return lnlike
 
-    def fit(self, numLevels, directory=None, numPerSave=1000,numParticles=5,new_level_interval=10000 ):
+    def fit(self, numLevels, directory=None, numPerSave=1000,numParticles=5,new_level_interval=10000,debug=False ):
 
       if directory is None:
         directory = "./"  

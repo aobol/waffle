@@ -25,7 +25,10 @@ from scipy.interpolate import interp1d
 
 class DataProcessor():
 
-    def __init__(self, detectorChanList, channel_file=""):
+    def __init__(self, detectorChanList, dataset=None, subset=1):
+        self.dataset = dataset
+        self.subset = subset
+
         #energy & current estimator to use for A/E
         self.energy_name = "trap_max"
         self.ecal_name = "ecal"
@@ -46,7 +49,11 @@ class DataProcessor():
         self.nl_file_name = os.path.join(self.mjd_data_dir,"NLCDB", "nonlinearities.h5")
 
         #TODO: in a real db?
-        self.channel_info_file_name = os.path.join(self.mjd_data_dir,"analysis", "channel_info{}.h5".format(channel_file))
+        if dataset is None:
+            self.channel_info_file_name = os.path.join(self.mjd_data_dir,"analysis", "channel_info.h5")
+        else:
+            self.channel_info_file_name = os.path.join(self.mjd_data_dir,"analysis", "channel_info_DS{}-{}.h5".format(self.dataset,self.subset))
+
         # self.cal_file_name = os.path.join(self.mjd_data_dir,"analysis", "calibration.h5")
         # self.psa_file_name = os.path.join(self.mjd_data_dir,"analysis", "psa.h5")
         # self.blcut_file_name = os.path.join(self.mjd_data_dir,"analysis", "blcuts.h5")
@@ -678,7 +685,7 @@ class DataProcessor():
 
                 try: os.mkdir("training_plots")
                 except OSError: pass
-                f2.savefig("training_plots/chan{}_waveforms".format(channel))
+                f2.savefig("training_plots/DS{}-{}_chan{}_waveforms".format(self.dataset,self.subset,channel))
                 plt.close(f2)
 
     def save_subset(self, channel, n_waveforms, training_data_file_name, output_file_name, exclude_list = [], do_plot=True):
@@ -730,7 +737,7 @@ class DataProcessor():
                 ax[0].plot( wf_window )
                 ax[1].plot( wf_window / wf.amplitude )
 
-            plt.savefig("training_plots/chan{}_{}wf_set.png".format(channel, n_waveforms))
+            plt.savefig("training_plots/DS{}-{}_chan{}_{}wf_set.png".format(self.dataset,self.subset, channel, n_waveforms))
 
             # plt.figure()
             # plt.hist(baseline_val_arr,bins="auto")

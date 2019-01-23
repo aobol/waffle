@@ -8,6 +8,8 @@ from .training import ResultComparison
 
 from .waveform import WaveformFitPlotter, WaveformFitResult
 
+from .tier3 import Tier3FitResult
+
 __all__ = [
 "TrainingPlotter",
 "TrainingResultSummary",
@@ -15,4 +17,6 @@ __all__ = [
 #
 "WaveformFitPlotter",
 "WaveformFitResult",
+#
+"Tier3FitResult",
 ]
