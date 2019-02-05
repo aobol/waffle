@@ -150,10 +150,10 @@ class MPIFitManager():
                     f.write(meminfo)
 
         wfs_param_arr = params[num_det_params:].reshape((self.num_waveforms,self.num_wf_params))
-        print("\nwfs_param_arr:")
-        for wf_par in wfs_param_arr:
-            [print(F"{val:03.04f}, ",end='') for val in wf_par]
-            print("")
+        # print("\nwfs_param_arr:")
+        # for wf_par in wfs_param_arr:
+        #     [print(F"{val:03.04f}, ",end='') for val in wf_par]
+        #     print("")
 
         # det_params = params[:num_det_params]
         # wf_params_all = params[num_det_params:]
@@ -186,28 +186,15 @@ class MPIFitManager():
         for wf_idx in range(self.num_waveforms):
             worker = np.int(wf_idx + 1)
 
-            # wf_params_i = (wf_params_all[(wf_idx*self.num_wf_params):((wf_idx+1)*self.num_wf_params)])
-
-            print(F"wf_params[num_det_params:] shape: {wf_params[num_det_params:].shape}")
-            print(F"wfs_param_arr[:,wf_idx] shape: {wfs_param_arr[wf_idx].shape}")
             wf_params[num_det_params:] = wfs_param_arr[wf_idx]
 
-            # print(F"wfs_param_arr[:,wf_idx] shape: {wfs_param_arr[:,wf_idx].shape}")
-            # wf_params[num_det_params:] = wfs_param_arr[:,wf_idx]
-
-            # wf_params[num_det_params:] = wf_params_i
-            # wf_params = np.concatenate([det_params,wf_params_i])
-            # print(F"The full wf {wf_idx} params are {wf_params}")
-
-            # print(F"Doing parallelized calc on {wf_idx}: {wf_params}")
-            print(F"About to ask {worker} to calc like of {wf_params}")
             self.comm.send(wf_params, dest=worker, tag=self.tags.CALC_LIKE)
 
         wf_likes = np.empty(self.num_waveforms)
         for i in range(self.num_waveforms):
                 worker = i + 1
                 result = self.comm.recv(source=worker, tag=self.tags.CALC_LIKE)#MPI.ANY_TAG)
-                print(F"Result: {result}")
+
                 wf_likes[i] = result
                 # wf_likes[i] = self.comm.recv(source=worker, tag=MPI.ANY_TAG)
 
@@ -240,29 +227,13 @@ class MPIFitManager():
                     print( "rank %d (local rank %d) calculating likelihood %d" % (MPI.COMM_WORLD.Get_rank(), self.rank, self.rank - 1) )
 
                 wf_idx = self.rank - 1
-                if isinstance(task,dict):
-                    params = task['samples'][wf_idx]
-                    # print(F"CALC_LIKE DICT? {self.rank}: {task.keys()}\n {params}")
-                    # ln_like = -np.inf #self.model.calc_wf_likelihood(params, wf_idx)
-                    print(F"CALC_LIKE DICT? BREAK. {self.rank}")
-                    break
-                else:
-                    print(F"CALC_LIKE {self.rank}:\n {task}")
-                    ln_like = self.model.calc_wf_likelihood(task, wf_idx)
-                print(F"CALC_LIKE {self.rank} returning: {ln_like}")
+                ln_like = self.model.calc_wf_likelihood(task, wf_idx)
+
                 self.comm.send(ln_like, dest=0, tag=status.tag)
 
             if status.tag == self.tags.CALC_WF:
                 data_len = self.model.output_wf_length
-                if isinstance(task,dict):
-                    params = task['samples'][wf_idx]
-                    print(F"CALC_WF DICT? {self.rank}: {task.keys()}\n{params}")
-                    model = self.model.make_waveform(data_len, params)
-                    # model = np.zeros(data_len)
-                    break
-                else:
-                    print(F"CALC_WF {self.rank}:\n {task}")
-                    model = self.model.make_waveform(data_len, task)
+                model = self.model.make_waveform(data_len, task)
                 
                 self.comm.send(model, dest=0, tag=status.tag)
 
@@ -287,10 +258,10 @@ class MPIFitManager():
         """
         mpi_sampler = dnest4.MPISampler(debug=self.debug)#comm=manager_comm, debug=False)
 
-        print("Initializing DNest4Sampler from fm fit...")
+        print(F"Initializing DNest4Sampler from fm fit in {directory}...")
         sampler = dnest4.DNest4Sampler(
             self.model,
-            backend=dnest4.backends.CSVBackend(basedir ="./" + directory,sep=" "),
+            backend=dnest4.backends.CSVBackend(basedir =directory,sep=" "),
             #MPISampler=mpi_sampler
             )
         
