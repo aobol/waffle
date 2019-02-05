@@ -93,7 +93,9 @@ class WaveformModel(ModelBaseClass):
         return prior
 
     def make_waveform(self, data_len, wf_params, charge_type=None):
+        # print(F"Given params are {wf_params}")
         r, z, phi, scale, maxt =  wf_params[:5]
+        print(F"waveform.make_waveform with r:{r:.03f}, z:{z:.03f}, phi:{phi:.03f}, scale:{scale:.03f}, t0:{maxt:.03f}")
 
         smooth = None
         skew=None
@@ -109,6 +111,9 @@ class WaveformModel(ModelBaseClass):
 
         if scale < 0:
             raise ValueError("Scale should not be below 0 (value {})".format(scale))
+
+        if phi > np.pi*2:
+            raise ValueError(F"Phi should not be above 2-pi (value {phi}")
 
         if not self.detector.IsInDetector(r, phi, z):
             raise ValueError("Point {},{},{} is outside detector.".format(r,phi,z))
@@ -135,7 +140,10 @@ class WaveformModel(ModelBaseClass):
         data = self.target_wf.windowed_wf
         # model_err = 0.57735027 * wf.baselineRMS
         model_err = 2.5 #TODO: get this from the waveform itself
+        # Could make a method in this waveform class that calculates it when
+        #  we initialize the class and then makes a class variable to hold it
         data_len = len(data)
+        print(F"waveform.calc_likelihood with {wf_params} and length {data_len}")
         model = self.make_waveform(data_len, wf_params, )
 
         if model is None:
