@@ -151,9 +151,9 @@ class MPIFitManager():
 
         wfs_param_arr = params[num_det_params:].reshape((self.num_waveforms,self.num_wf_params))
         # print("\nwfs_param_arr:")
-        # for wf_par in wfs_param_arr:
-        #     [print(F"{val:03.04f}, ",end='') for val in wf_par]
-        #     print("")
+        # for i,wf_par in enumerate(wfs_param_arr):
+        #     [print(F"{val:03.01f}, ",end='') for val in wf_par]
+        #     print(F" :: {i}")
 
         # det_params = params[:num_det_params]
         # wf_params_all = params[num_det_params:]
@@ -162,12 +162,13 @@ class MPIFitManager():
         # for wf_idx in range(self.num_waveforms):
         #     wf_params_i.append(wf_params_all[wf_idx*self.num_waveforms:((wf_idx+1)*self.num_waveforms)])
 
-        # print("params:\n")
+        # print(F"params {self.rank}:\n{str(params.tolist())}")
         # print(params)
         # print(str(params.tolist()))
         # exit()
 
-        wf_params = np.empty(num_det_params+len(wfs_param_arr[0]))
+        # wf_params = np.empty(num_det_params+len(wfs_param_arr[0]))
+        wf_params = np.empty(self.num_det_params + self.num_wf_params)
         wf_params[:num_det_params] = params[:num_det_params]
 
         #nonparallelized: should only be called on init
@@ -175,7 +176,8 @@ class MPIFitManager():
             print("Doing the nonparallel init")
             ln_like = 0
             for wf_idx in range(self.num_waveforms):
-                wf_params[num_det_params:] = wfs_param_arr[:,wf_idx]
+                # print(F"Setting {wf_params[num_det_params:]} = {wfs_param_arr[wf_idx,:]}")
+                wf_params[num_det_params:] = wfs_param_arr[wf_idx,:]
                 # wf_params_i = (wf_params_all[(wf_idx*self.num_wf_params):((wf_idx+1)*self.num_wf_params)])
                 ln_like += self.model.calc_wf_likelihood(wf_params, wf_idx)
                 # ln_like += self.model.calc_wf_likelihood(self.model.get_wf_params(params, wf_idx), wf_idx)
@@ -290,7 +292,7 @@ class MPIFitManager():
 
       if manager_comm.rank == 0:
           # Set up the sampler. The first argument is max_num_levels
-          sampler = dnest4.DNest4Sampler(self.model, backend=dnest4.backends.CSVBackend(basedir ="./" + directory,
+          sampler = dnest4.DNest4Sampler(self.model, backend=dnest4.backends.CSVBackend(basedir =directory,#basedir ="./" + directory,
                                                                           sep=" "), MPISampler=mpi_sampler)
 
           gen = sampler.sample(max_num_levels=numLevels, num_steps=200000, new_level_interval=new_level_interval,
