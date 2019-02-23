@@ -46,6 +46,8 @@ class ResultBase():
         # elif model_type == "Waveform":
         #     self.model = 
 
+        self.num_samples = num_samples
+        
         self.num_wf_params = self.model.num_wf_params
         self.wf_conf = self.model.conf.wf_conf
         self.model_conf = self.model.conf.model_conf

@@ -435,6 +435,63 @@ class WaveformFitResult(ResultBase):
             # ax0.set_ylim(-20, wf_model.target_wf.amplitude*1.1)
             ax0.axhline(y=0,color="black", ls=":")
 
+    def plot_all_wfs(self):
+        """ Plots all waveforms together
+        Calculates each residual
+        plots them all together
+        """
+        if(self.best_params is None):
+            self.get_best_result()
+
+        plt.figure(figsize=(self.width,8))
+        gs = gridspec.GridSpec(2, 1, height_ratios=[1, 2])
+        ax0 = plt.subplot(gs[0])                # holds the best wfs
+        ax1 = plt.subplot(gs[1], sharex=ax0)    # holds the residuals
+        ax1.set_xlabel("Digitizer Time [ns]")
+        ax0.set_ylabel("Voltage [Arb.]")
+        ax1.set_ylabel("Residual")
+
+        residual = []
+
+        # for i,(wf_model, best_params) in enumerate(zip(self.wf_model,self.best_params)):
+        for i in self.index:
+            wf_model = self.wf_model[i]
+            best_params = self.best_params[i]
+
+            i_color = i % len(colors)
+
+            target_wf = wf_model.target_wf.windowed_wf
+            data_len = len(target_wf)
+
+            # plot the target wf with a time axis
+            data_len = wf_model.target_wf.window_length
+            t_data = np.arange(data_len) * 10
+            # ax0.plot(t_data, target_wf, color='red', ls = "-")
+
+            # generate the fit-determined best wf
+            best_wf = wf_model.make_waveform(data_len, best_params, )
+
+            if best_wf is None:
+                #cry
+                return
+
+            # plot the residuals together
+            # plot a residual
+            resid = best_wf -  target_wf
+            residual.append(resid)
+
+            ax0.plot(t_data, best_wf, color=colors[i_color], alpha=0.2,)# linestyle="steps")
+            ax1.plot(t_data, resid, color=colors[i_color], alpha=0.2,)# linestyle="steps")
+
+        # ax0.set_ylim(-20, wf_model.target_wf.amplitude*1.1)
+        avg_residual = np.mean(residual,0)
+
+        ax0.axhline(y=0,color="black", ls=":")
+        # t_model = np.arange(data_len) * 10
+        # ax0.plot(t_data, avg_residual, color='blue', alpha=0.9)
+
+        return avg_residual
+
 
     def plot_avg_residual(self):
         """ Calculates each residual
@@ -655,6 +712,8 @@ class WaveformFitResult(ResultBase):
 
     def plot_waveform(self):
         """Look at how the fit waveforms... look
+
+        TODO: This relies on self.wf_model being a non-array, but its an array now?
 
         """
         # data = self.result_data
