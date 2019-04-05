@@ -19,7 +19,7 @@ class VelocityModel(JointModelBase):
                                 ]
 
         velocity_means = np.array([h100_lo, h111_lo, h100_hi, h111_hi])
-        velocity_variance = 0.1
+        velocity_variance = 0.02
 
         velo_lo_cutoff = 1
         velo_hi_cutoff = 10*velocity_means

@@ -80,4 +80,14 @@ class JointModelBundle(object):
     def apply_params(self, params):
         for (model_num, model) in enumerate(self.models):
             start_idx = self.start_map[model_num]
-            model.apply_to_detector(params[start_idx:start_idx+model.num_params], self.detector)
+            try:
+                model.apply_to_detector(params[start_idx:start_idx+model.num_params], self.detector)
+            except TypeError as e:
+                print("You tried to apply something weird to your detector?")
+                print(F"You aimed for index range {start_idx} to {start_idx+model.num_params} ")
+                # print(F"Your params that you wanted to apply looked like:\n{params}")
+                print(F"You applied them to {self.detector}")
+                print("Quitting...")
+                exit()
+                raise e
+

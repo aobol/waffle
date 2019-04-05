@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .configuration import FitConfiguration
+from .configuration import FitConfiguration, WaveformConfiguration, WaveformBatchConfiguration, WaveformT3BatchConfiguration
 
-from .trainingfits import LocalFitManager
+from .trainingfits import LocalFitManager, MPIFitManager
 from .waveformfits import WaveformFitManager

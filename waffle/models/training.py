@@ -100,23 +100,34 @@ class Model(object):
               self.joint_models.get_prior(), wf_params
             ])
 
-        if False:#print out the prior to make sure i know what i'm doing
-            import matplotlib.pyplot as plt
-            plt.figure()
+        # if True:#print out the prior to make sure i know what i'm doing
+        #     # import matplotlib.pyplot as plt
+        #     # plt.figure()
 
-            self.apply_detector_params(prior[:self.num_det_params])
-            for wf_idx, wf_model in enumerate(self.wf_models):
-                print("waveform number {}".format(wf_idx))
-                p = plt.plot(wf_model.target_wf.windowed_wf)
-                wf_params = prior[self.num_det_params + wf_idx*self.num_wf_params: self.num_det_params + (wf_idx+1)*self.num_wf_params]
-                fit_wf = wf_model.make_waveform( self.output_wf_length,   wf_params)
-                plt.plot(fit_wf, c=p[0].get_color())
-            plt.show()
-            exit()
+        #     # self.apply_detector_params(prior[:self.num_det_params])
+        #     for wf_idx, wf_model in enumerate(self.wf_models):
+        #         print("waveform number {}".format(wf_idx))
+        #         # p = plt.plot(wf_model.target_wf.windowed_wf)
+        #         # print(wf_model.target_wf.windowed_wf)
+        #         print(prior[self.num_det_params + wf_idx*self.num_wf_params: self.num_det_params + (wf_idx+1)*self.num_wf_params])
+        #         # wf_params = prior[self.num_det_params + wf_idx*self.num_wf_params: self.num_det_params + (wf_idx+1)*self.num_wf_params]
+        #         # fit_wf = wf_model.make_waveform( self.output_wf_length,   wf_params)
+        #         # plt.plot(fit_wf, c=p[0].get_color())
+        #     # plt.show()
+        #     exit()
+        
         return prior
 
     def get_wf_params(self, params, wf_idx):
         return np.concatenate(( params[:self.num_det_params], params[self.num_det_params + wf_idx*self.num_wf_params: self.num_det_params + (wf_idx+1)*self.num_wf_params]))
+
+    # def get_wf_params_par(self, params, wf_idx):
+
+    #     return np.concatenate(( 
+    #         params[:self.num_det_params], 
+    #         params[self.num_det_params + wf_idx*self.num_wf_params: self.num_det_params + (wf_idx+1)*self.num_wf_params]
+    #         ))
+
 
     def perturb(self, params):
         logH = 0.0

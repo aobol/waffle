@@ -10,6 +10,9 @@ from siggen import PPC
 
 from ._parameterbase import ModelBaseClass, Parameter
 
+import matplotlib.pyplot as plt 
+from matplotlib import gridspec
+
 max_float = sys.float_info.max
 
 class WaveformModel(ModelBaseClass):
@@ -37,7 +40,7 @@ class WaveformModel(ModelBaseClass):
         self.do_smooth=do_smooth
         self.smoothing_type = smoothing_type
         if do_smooth:
-            if smoothing_type == "gauss":
+            if smoothing_type == "gauss" or smoothing_type == "gaussian":
                 smooth_guess = 20
                 self.params.append(Parameter("smooth", "gaussian", mean=smooth_guess, variance=10, lim_lo=1, lim_hi=100))
             elif smoothing_type == "skew":
@@ -90,7 +93,9 @@ class WaveformModel(ModelBaseClass):
         return prior
 
     def make_waveform(self, data_len, wf_params, charge_type=None):
+        # print(F"Given params are {wf_params}")
         r, z, phi, scale, maxt =  wf_params[:5]
+        # print(F"waveform.make_waveform with r:{r:.03f}, z:{z:.03f}, phi:{phi:.03f}, scale:{scale:.03f}, t0:{maxt:.03f}")
 
         smooth = None
         skew=None
@@ -106,6 +111,9 @@ class WaveformModel(ModelBaseClass):
 
         if scale < 0:
             raise ValueError("Scale should not be below 0 (value {})".format(scale))
+
+        if phi > np.pi*2:
+            raise ValueError(F"Phi should not be above 2-pi (value {phi}")
 
         if not self.detector.IsInDetector(r, phi, z):
             raise ValueError("Point {},{},{} is outside detector.".format(r,phi,z))
@@ -132,7 +140,10 @@ class WaveformModel(ModelBaseClass):
         data = self.target_wf.windowed_wf
         # model_err = 0.57735027 * wf.baselineRMS
         model_err = 2.5 #TODO: get this from the waveform itself
+        # Could make a method in this waveform class that calculates it when
+        #  we initialize the class and then makes a class variable to hold it
         data_len = len(data)
+        # print(F"waveform.calc_likelihood with {wf_params} and length {data_len}")
         model = self.make_waveform(data_len, wf_params, )
 
         if model is None:
@@ -140,6 +151,27 @@ class WaveformModel(ModelBaseClass):
         else:
             inv_sigma2 = 1.0/(model_err**2)
             ln_like = -0.5*(np.sum((data-model)**2*inv_sigma2 - np.log(inv_sigma2)))
+            
+            # r, z, phi, scale, maxt,smooth =  wf_params[:6]
+            # axes = plt.gca()
+
+            # gs = gridspec.GridSpec(2, 1, height_ratios=[4, 1])
+            # ax0 = plt.subplot(gs[0])
+            # ax1 = plt.subplot(gs[1], sharex=ax0)
+            # ax1.set_xlabel("Digitizer Time [ns]")
+            # ax0.set_ylabel("Voltage [Arb.]")
+            # ax1.set_ylabel("Residual")
+            
+            # ax0.plot(data,label="data")
+            # ax0.plot(model,label="fit")
+            # textstr = "r:     {r:2.2f}\nz:     {z:2.2f}\nphi:     {phi:2.3f}\nscale:  {scale:5.1f}\nmaxt:    {maxt:3.2f}\nsmooth:   {smooth:3.2f}\nll:   {ll:10.1f}".format(r=r,z=z,phi=phi,scale=scale,maxt=maxt,smooth=smooth,ll=ln_like)
+            # ax0.text(0.02, 0.5, textstr, fontsize=14)
+            # ax0.set_ylim([0,1.1*np.max(data)])
+            # ax0.legend()
+            # ax1.plot(model-data)
+            # plt.pause(0.05)
+            # plt.clf()
+            # plt.show()
 
         return ln_like
 
