@@ -584,6 +584,113 @@ class TrainingResultSummary(ResultBase):
             else:
                 plt.show()
 
+
+
+    def summarize_chains_kde(self,do_plots=False,save_dir=None):
+        """ Plot out kde figs of the parameters 
+        save_dir : If included, the directory where output plots and results will be saved
+        """
+
+        import seaborn as sns
+        # sample = np.hstack((np.random.randn(30), np.random.randn(20)+5))
+        fig, ax = plt.subplots(figsize=(8,4))
+        # sns.distplot(sample, rug=True, hist=False, rug_kws={"color": "g"},
+        #     kde_kws={"color": "k", "lw": 3})
+        # plt.show()
+
+        if(save_dir is not None):
+            out_name = self.id + "_chain_summary.txt"
+            out_file = open(os.path.join(save_dir,out_name), 'w',newline='\n')
+            out_file.write("Summary for {}\n".format(self.id))
+            out_file.write("Using the last {} samples ({} total)\n".format(self.num_samples,self.total_samples))
+            out_file.write("Generated at {}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
+            
+
+        for the_model,the_params in self.params_values.items():
+
+            print("Model Results: {}".format(the_model))
+            if(save_dir is not None):
+                out_file.write("Model Results: {}\n".format(the_model))
+                
+            if(do_plots):
+                plt.figure().suptitle(the_model)
+                gs = gridspec.GridSpec(len(the_params.keys()), 2,width_ratios=[1, 3])
+                plot_num = 0
+            
+            for val_name,val_array in the_params.items():
+                avg = np.average(val_array)
+                stdev = np.std(val_array)
+                print("    {}:".format(val_name))
+                print("         avg:{}".format(avg))
+                print("         std:{}".format(stdev))
+                if(save_dir is not None):
+                    out_file.write("    {}:\n".format(val_name))
+                    out_file.write("         avg:{}\n".format(avg))
+                    out_file.write("         std:{}\n".format(stdev))
+
+                if(do_plots):
+                    
+                    plt.subplot(gs[plot_num, 0])
+                    
+                    # plt.subplot(len(the_params.keys()),1,plot_num)
+                    sns.distplot(val_array, rug=True, hist=False, rug_kws={"color": "g"},
+                        kde_kws={"color": "k", "lw": 1},vertical=True)
+                    # plt.hist(val_array,bins='rice',orientation=u'horizontal',)
+                    plt.axhline(avg,color='r',linestyle='dashed')
+                    plt.axhline(avg+stdev,color='r',linestyle='dashed')
+                    plt.axhline(avg-stdev,color='r',linestyle='dashed')
+                    plt.title(val_name,loc='left')
+
+                    plt.subplot(gs[plot_num, 1])
+                    # plt.subplot(len(the_params.keys()),2,plot_num)
+                    plt.plot(val_array)
+                    plt.axhline(avg,color='r',linestyle='dashed')
+                    plt.axhline(avg+stdev,color='r',linestyle='dashed')
+                    plt.axhline(avg-stdev,color='r',linestyle='dashed')
+                    plt.tight_layout()
+                    # plt.subplots_adjust(top=0.85)
+                    plot_num += 1
+
+
+        if(do_plots):
+            if(save_dir is not None):
+                filename = os.path.join(save_dir,self.id + "_chain_summary_kde.pdf")
+                # filename = self.id + "_chain_summary.pdf"
+                # filename = "chain_summary.pdf"
+                # filename = 'multipage.pdf'
+                print("Saving figures to {}".format(filename))
+                self.multipage_plot(filename)
+                plt.close('all')
+            else:
+                plt.show()
+
+    def kde(data):
+        """
+        Perform a KDE on the given data chain
+        """
+        import seaborn as sns
+        p=sns.kdeplot(data, shade=True)
+
+        x,y = p.get_lines()[0].get_data()
+        
+        kde = [x,y]
+
+        #care with the order, it is first y
+        #initial fills a 0 so the result has same length than x
+        cdf = scipy.integrate.cumtrapz(y, x, initial=0)
+
+        nearest_05 = np.abs(cdf-0.5).argmin()
+
+        x_median = x[nearest_05]
+        y_median = y[nearest_05]
+
+        nearest_095 = np.abs(cdf-0.95).argmin()
+        nearest_005 = np.abs(cdf-0.05).argmin()
+
+
+
+        return kde,median,l,u
+
 class ResultComparison(ResultBase):
     # def __init__(self, result_directory, num_samples, sample_dec=1, model_type="Model"):
         # super().__init__(result_directory, num_samples, sample_dec)
